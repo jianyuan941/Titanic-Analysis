@@ -1,0 +1,143 @@
+---
+title: "Gender Analysis"
+author: "Choo Jian Yuan"
+format: html
+editor: visual
+---
+
+```{r}
+#| include: false
+#install.packages("writexl")
+install.packages("echarts4r", repos = "https://cloud.r-project.org")
+library("skimr")
+library("tidyverse")
+library("kableExtra")
+library("dplyr")
+library("janitor")
+library("echarts4r")
+source("function.R")
+library("rlang")
+library("dplyr")
+library("echarts4r")
+library("plotly")
+
+
+
+knitr::knit_child("Data2viewer.qmd")
+knitr::knit_child("Data1viewer.qmd")
+```
+
+```{r}
+#| include: false
+Adjustment_Data <- function(n,d1,d2,id){
+  merged(n,d1,d2,id)
+  updated <- get(n) %>% 
+    select(-cabin) %>% 
+    mutate(age_group = cut(
+      age,
+      breaks = c(0, 10, 20, 30, 40, 50, 60, 82),
+      labels = c("0-10","10-20","20-30","30-40","40-50","50-60","60+"),
+      right = FALSE,
+      ordered_result = TRUE
+      ),
+      
+      ) %>% 
+    mutate(age_group = fct_explicit_na(age_group, na_level = "Unknown"))
+  
+  assign(n, updated, envir = .GlobalEnv)
+}
+Adjustment_Data("merged_data", data1, data2, "passenger_id") %>% skim()
+
+
+```
+
+## Gender Distribution
+
+```{r}
+piechart_gg(merged_data,sex,"Attribute","Passengers' Distribution by Gender")## 
+```
+
+## Gender x Survival
+
+```{r}
+merged_data %>% 
+  mutate(survived = case_when(
+    survived == "D" ~"Decreased",
+    survived == "S" ~"Survived",
+    TRUE ~ survived
+  )) %>% 
+  group_by(sex, survived) %>% 
+  mutate(sex_survived = n()) %>% 
+  ungroup() %>% 
+  select(sex, survived, sex_survived) %>% 
+  unique() %>% 
+  ggplot(aes(
+    x=sex,
+    y=sex_survived,
+    fill=survived
+  ))+
+  geom_col()+
+  labs(
+    title= "Survival by Gender",
+    x= "Gender",
+    y= "Survival",
+    fill= "Attribute"
+  )+
+  geom_text(aes(
+    label=sex_survived
+  ),
+  position=position_stack(vjust=0.8))+
+  theme(
+    plot.title.position = "plot",
+    plot.title = element_text(margin=margin(t=10,b=20)),
+    axis.title.x = element_text(margin=margin(t=10))
+  )+
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,300))
+```
+
+## Gender x Ticket Class
+
+```{r}
+merged_data %>% 
+  mutate(pclass = as.character(pclass)) %>% 
+  group_by(sex, pclass) %>% 
+  mutate(sex_pclass = n()) %>% 
+  ungroup() %>% 
+  group_by(sex) %>% 
+  mutate(sex_count = n()) %>% 
+  ungroup() %>% 
+  select(sex, sex_count, pclass, sex_pclass) %>% 
+  unique() %>% 
+  arrange(pclass) %>% 
+  barchart_gg_custom(.,sex,sex_pclass,pclass)+
+  labs(
+    title= "Ticket Class by Gender",
+    x= "Gender",
+    y= "Ticket Class",
+    fill= "Attribute"
+  )+
+  geom_text(aes(
+    label= paste0(
+      sex_pclass,
+      " (",
+      round((sex_pclass/sex_count)*100,1),
+      "%)"
+    )
+  ),
+  position = position_stack(vjust=0.8)
+  )+
+  theme(
+    plot.title.position = "plot",
+    plot.title = element_text(margin= margin(t=10,b=20)),
+    axis.title.x = element_text(margin= margin(t=10)) 
+  )+
+  scale_y_continuous(expand=c(0,0),
+                     limits=c(0,300))
+```
+
+## Gender x Embarkation
+
+```{r}
+merged_data
+```

@@ -1,0 +1,51 @@
+---
+title: "Titanic Analysis"
+author: "Choo Jian Yuan"
+date: "2025-06-09"
+output: 
+  html_document: 
+    toc: true
+    css: CSS folder/style.css
+---
+
+```{r include=FALSE}
+library("tidyverse")
+library("skimr")
+library("kableExtra")
+library("knitr")
+library("stringr")
+library("dplyr")
+library("janitor")
+library("rmarkdown")
+```
+
+```{r include=FALSE}
+setwd("C:\\Users\\JY\\Desktop\\R script\\Project\\Titanic - Machine learning from disaster\\titanic\\Titanic\\source folder")
+list.files()
+data1 <- read.csv("gender_submission.csv") %>% 
+          clean_names() %>% 
+          mutate(passenger_id = as.character(passenger_id),
+                 survived = case_when(
+                   survived == 1 ~ "S",
+                   survived == 0 ~ "D",
+                   TRUE ~ as.character(survived) 
+                 ))
+data2 <- read.csv("test.csv") %>% 
+          clean_names() %>% 
+          mutate(passenger_id = as.character(passenger_id))
+data3 <- read.csv("train.csv")
+```
+# Summary of dataset
+## Dataset 1 shows the total number of `r n_distinct(data1$passenger_id)` passengers who boarded the Titanic and their survival status after the ship sank.
+```{r}
+#This show the summary content of Dataset 1
+skim(data1) 
+summary(data1)
+#This show the summary content of Dataset 2
+skim(data2) 
+summary(data2)
+#This show the summary content of Dataset 3
+skim(data3)
+
+```
+

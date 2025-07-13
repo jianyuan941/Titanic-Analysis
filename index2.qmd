@@ -1,0 +1,25 @@
+---
+title: "Detail Analysis"
+author: "Choo Jian Yuan"
+---
+
+
+```{r}
+#| include: false
+library("skimr")
+library("tidyverse")
+library("kableExtra")
+library("dplyr")
+library("janitor")
+
+source("function.R")
+
+knitr::knit_child("Data2viewer.qmd")
+knitr::knit_child("Data1viewer.qmd")
+```
+
+```{r}
+merged_data <- merge(data1, data2, by = "passenger_id")
+skim(merged_data)
+
+```

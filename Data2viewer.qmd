@@ -1,0 +1,324 @@
+---
+title: "test.csv"
+author: "Choo Jian Yuan"
+output: bookdown::html_document2
+editor: visual
+---
+
+**Date:** 12/06/2025
+
+#### Before use the data for my analysis, preemptive checking has been done and result as per below：
+
+```{r}
+#| include: false
+library("skimr")
+library("tidyverse")
+library("kableExtra")
+library("dplyr")
+library("janitor")
+
+  #Function
+  source("function.R")
+  
+# Define file name and variable name as string
+file_name <- "test.csv"
+dataframe_name <- "data2"
+folder_path <- "C:\\Users\\JY\\Desktop\\R script\\Project\\Titanic - Machine learning from disaster\\titanic\\Titanic\\source folder\\"
+
+combined_function(file_name, dataframe_name, folder_path) 
+
+
+
+```
+
+```{=html}
+<style>
+
+.table-of-summary {
+  position: fixed;
+  bottom: 20px;
+  right: 0;
+  width: 40svh;
+  height: 95svh;
+  background-color: #ffffffee;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 8px 0 0 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 999;
+  font-size: 0.9rem;
+  overflow-y: auto;
+  transform: translateX(100%);  /*Initially off screen */
+  transition: transform 0.3s ease-in-out;
+}
+
+.table-of-summary.show {
+  transform: translateX(0); /* Slide in */
+}
+
+#toggleButton {
+  position: fixed;
+  bottom: 30px;
+  right: 0;
+  z-index: 1000;
+  padding: 0.5rem 1rem;
+  border-radius: 8px 0 0 8px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+h4 {
+  color: Darkgreen;
+}
+hr {
+  background-color: Darkgreen;
+  border: 3px solid;
+}
+
+</style>
+```
+
+::: {#summaryPanel .table-of-summary}
+Summary of checking
+
+-   `passenger_id` column has data length of `r sig_multiple(data2$passenger_id," digit", " digits")` character. `r link("#skim")`
+
+-   `sex` column has only `r length(unique(data2$sex))` unique value which are `r join_word(data2$sex)`. `r link("#sex-detail")`
+
+-   `ticket` column shows `r anyDuplicated(data2$ticket)` `r if(anyDuplicated(data2$ticket)>1){" duplicates"}else{" duplicate"}`. I found out dupplication is due to family members might share the same ticket. `r link("#dupdata")`
+
+-   `cabin` column shows `r sum(data2[,"cabin"] == "")` row with NA. However, this will not cause any issue as cabin is not within part of our assessment. `r link("#skim")`
+
+-   `embarked` column shows `r length(unique(data2$embarked))` unique`r if(length(unique(data2$embarked))>1){" values"}else{" value"}` of `r join_word(data2$embarked)`. Result show in section - <a href="#Embarkation">Direct</a>
+
+-   `pclass`column seperated all tickets into `r sum(length(unique(data2$pclass)))` classes of `r join_word(data2$pclass)`. `r  link("#pclass")`
+
+-   `age` column represents passengers' age when boarded titanic. `r link("#age")`
+
+-   `sib_sp` column represents the total number of siblings and spouses who boarded the ship along with each passenger. `r link("#sib_sp")`
+
+-   `parch` column represents the total number of parents and children who boarded the ship along with each passenger. `r link("#Parch")`
+
+-   `fare` column represents ticket fee for onboarding. Max, Min, Median and Mean have been calculated. `r link("#fare")`
+
+-   Full dataset <a href="#full-data-set">Direct</a>
+:::
+
+<button id="toggleButton">
+
+☰
+
+</button>
+
+```{=html}
+<script>
+document.getElementById('toggleButton').addEventListener('click', function () {
+  document.querySelector('.table-of-summary').classList.toggle('show');
+});
+</script>
+```
+
+`r h4_header("skim","Summary for Dataset")`
+
+```{r}
+data2 %>% skim()
+```
+
+`r h4_header("sex-detail","Summary for Sex")`
+
+```{r}
+
+Sex_category <- data2$sex %>% unique()
+Sex_detail <- function(Xs){
+  results <- c()
+  for(x in Xs){
+    count <- sum(data2[,"sex"]==x)
+    sample_samples <- if(count>1){" samples are"}else{" sample is"}
+    result <- paste0(count, sample_samples, " found with sex = ", x)
+    results <- c(results, result)
+  }
+  return(results)
+}
+
+Sex_detail(Sex_category) %>% 
+  result_display(.,"")
+
+```
+
+`r h4_header("dupdata","Summary for duplicated data")`
+
+```{r}
+Duplicated_data_list <- arrange(data2[duplicated(data2$ticket)|duplicated(data2$ticket , fromLast = TRUE),], ticket)
+unique_ticket_number <- unique(Duplicated_data_list$ticket)
+
+
+ticket_detail <- function(Xs){
+  results <- c()
+  for(x in Xs){
+    count <- sum(Duplicated_data_list[,"ticket"]== x)
+    sample_samples <- if(count>1){" samples are "}else{" sample is "}
+    result <- paste0(count, sample_samples, "found when ticket no = ", x)
+    results <- c(results, result)
+  }
+  return(results)
+}
+
+ticket_detail(unique_ticket_number) %>% 
+  sort(., decreasing =TRUE) %>% 
+  result_display(.,"There is total 60 duplications. Table below show summary of duplicated ticket")
+
+```
+
+`r h4_header("Embarkation","Summary for Embarkation")`
+
+```{r}
+#C - embarked from Cherbourg
+#Q - embarked from Queenstown 
+#S - embarked from Southampton.
+
+Embarkation_category <- sort(unique(data2$embarked))
+Embarkation_detail <- function(Xs){
+  results <- c()
+  for(x in Xs){
+      
+      #Detail clarification
+      adjustment_x <- if(x == "C"){"Cherbourg"}
+                      else if(x == "Q"){"Queenstown"}
+                      else if(x == "S"){"Southampton"}
+                      else {as.character(x)}
+    
+    count <- sum(data2[,"embarked"]==x)
+    sample_samples <- if(count>1){" samples are "}else{" sample is "}
+    result <- paste0(count, sample_samples, "found with embarked = ", adjustment_x)
+    results <- c(results, result)
+  }
+  return(results)
+}
+Embarkation_detail(Embarkation_category) %>% 
+  result_display(.,"Below refer to onboarding location")
+```
+
+`r h4_header("pclass","Summary for Pclass")`
+
+```{r}
+
+# 1 - 1st class
+# 2 - 2nd class
+# 3 - 3rd class
+
+pclass_category <- sort(unique(data2$pclass))
+pclass_detail <- function(Xs){
+  results <- c()
+  for(x in Xs){
+    
+      #Detail clarification
+      adjustment_x <- if( x == 1 ){"1st class"}
+                      else if( x == 2 ){"2nd class"}
+                      else if( x == 3 ){"3rd class"}
+                      else {as.character(x)}
+    
+    count <- sum(data2[,"pclass"] == x)
+    sample_samples <- if(count>1){" samples are"}else{" sample is"}
+    result <- paste0(count, sample_samples, " found with pclass = ", adjustment_x)
+    results <- c(results, result)
+  }
+  return(results)
+}
+
+pclass_detail(pclass_category) %>% 
+  result_display(.,"")
+```
+
+`r h4_header("age","Summary for age")`
+
+```{r}
+
+age_in_detail <- function(x){
+  max <- paste0("Max = ", max(unique(x), na.rm = TRUE))
+  mean <- paste0("Mean = ", round(mean(unique(x), na.rm = TRUE),4))
+  median <- paste0("Median = ", median(unique(x), na.rm = TRUE))
+  min <- paste0("Min = ", min(unique(x), na.rm = TRUE))
+  results <- c(max, mean, median, min)
+  return(results)
+}
+
+age_in_detail(data2$age) %>% 
+  tibble("Output :" =.) %>% 
+  kable(caption= "",align = "l") %>% 
+  kable_styling()
+```
+
+`r h4_header("Parch","Summary for Parch")`
+
+```{r}
+
+parch_size <- unique(data2$parch)
+parch_size_in_detail <- function(Xs){
+  results <- c()
+  for (x in Xs){
+      
+      #Detail classification
+      adjustment_x <- paste0(x, " parent or children boarded along")
+    
+    count <-sum(data2[,"parch"]==x)
+    passenger_or_passengers <- if(count>1){"passengers"} else {"passenger"}
+    result <- paste0(count," ",passenger_or_passengers, " with parch = ", adjustment_x)
+    results <- c(results, result)
+  }
+  return(results)
+}
+parch_size_in_detail(parch_size) %>% 
+  result_display(.,"")
+```
+
+`r h4_header("sib_sp","Summary for Sib_Sp")`
+
+```{r}
+sib_sp_size <- unique(data2$sib_sp)
+sib_sp_size_in_detail <- function(Xs) {
+  results <- c()
+  for(x in Xs){
+    count <- sum(data2[,"sib_sp"]==x)
+    sample_samples <- if(count>1){" samples "}else{" sample "}
+    result <- paste0(count, sample_samples, "with Sib_sp = ", x)
+    results <- c(results, result)
+  }
+  return(results)
+}
+sib_sp_size_in_detail(sib_sp_size) %>% 
+  result_display(.,"")
+
+
+```
+
+`r h4_header("fare","Summary for fare")`
+
+```{r}
+anyDuplicated(data2$fare) %>% 
+  tibble("Output :" = .) %>%
+  kable(
+    caption = "Fare column show 14 duplicated values",
+    align = "l") %>% 
+  kable_styling()
+
+fare_in_detail <- function(x){
+  mean <- paste0("Mean = ",round(mean(unique(data2$fare) , na.rm = TRUE),4))
+  max <- paste0("Max = ",round(max(unique(data2$fare) , na.rm = TRUE),4))
+  min <- paste0("Min = ",round(min(unique(data2$fare) , na.rm = TRUE),4))
+  median <- paste0("Median = ",round(median(unique(data2$fare) , na.rm = TRUE),4))
+    concatenate <- c(mean, max, min, median)
+    return(concatenate)
+}
+fare_in_detail(data2$fare) %>% 
+  result_display(.,"")
+
+
+```
+
+`r h4_header("full-data-set","Full dataset")`
+
+```{r}
+data2 %>% arrange(data2$ticket) %>% kbl(caption="Full test.csv dataset") %>% kable_styling()
+```

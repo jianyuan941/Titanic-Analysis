@@ -1,0 +1,27 @@
+project:
+  type: book
+  output-dir: docs
+
+book:
+  title: "Titanic dataset analysis"
+  author: "Choo Jian Yuan"
+  date: "17/06/2025"
+  chapters:
+    - index.qmd
+    - part: Dataset's Detail
+      chapters: 
+        - Data1viewer.qmd
+        - Data2viewer.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme:
+      - cosmo
+      - brand
+  pdf:
+    documentclass: scrreprt
+
+editor: visual
+

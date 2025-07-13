@@ -1,0 +1,157 @@
+---
+title: "gender_submission.csv"
+author: "Choo Jian Yuan"
+format: html
+editor: visual
+---
+
+```{r}
+#| include: false
+library(kableExtra)
+library(dplyr)
+library(janitor)
+library(skimr)
+library(tidyverse)
+
+ #Function
+  source("function.R")
+
+# Define file name and variable name as string
+file_name <- "gender_submission.csv"
+dataframe_name <- "data1"
+folder_path <- "C:\\Users\\JY\\Desktop\\R script\\Project\\Titanic - Machine learning from disaster\\titanic\\Titanic\\source folder\\"
+
+combined_function(file_name, dataframe_name, folder_path) 
+
+```
+
+#### Before use the data for my analysis, preemptive checking has been done and result as per below：
+
+```{r}
+# Adjustment done on dataset 
+#  1.Change passenger_id become character instead of numerical 
+#  2.translate survived status in more readable manner where: 
+  # S = survive 
+  # D = death
+
+data1 <- data1 %>% 
+  clean_names() %>% 
+  mutate (passenger_id = as.character(passenger_id), 
+          survived = case_when(
+            survived == 1 ~ "S", 
+            survived == 0 ~ "D", 
+            TRUE ~ as.character(survived))) 
+
+
+```
+
+```{=html}
+<style>
+
+.table-of-summary {
+  position: fixed;
+  bottom: 20px;
+  right: 0;
+  width: 40svh;
+  height: 95svh;
+  background-color: #ffffffee;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 8px 0 0 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 999;
+  font-size: 0.9rem;
+  overflow-y: auto;
+  transform: translateX(100%);  /*Initially off screen */
+  transition: transform 0.3s ease-in-out;
+}
+
+.table-of-summary.show {
+  transform: translateX(0); /* Slide in */
+}
+
+#toggleButton {
+  position: fixed;
+  bottom: 30px;
+  right: 0;
+  z-index: 1000;
+  padding: 0.5rem 1rem;
+  border-radius: 8px 0 0 8px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+h4 {
+  color: Darkgreen;
+}
+hr {
+  background-color: Darkgreen;
+  border: 3px solid;
+}
+
+</style>
+```
+
+```{r}
+#| include: false
+
+length(data1$passenger_id)
+```
+
+::: {#summaryPanel .table-of-summary}
+Summary of checking
+
+-   `passenger_id` column has `r length(data1$passenger_id)` unique IDs with characters length of `r sig_multiple(data1$passenger_id," digit"," digits")`. `r link("#Summary-for-Data1")`
+
+-   `survived` column has `r length(unique(data1$survived))` unique values of `r join_word(data1$survived)`. `r link("#survived")`
+
+-   Full dataset <a href="#full-data-set">Direct</a>
+:::
+
+<button id="toggleButton">
+
+☰
+
+</button>
+
+```{=html}
+<script>
+document.getElementById('toggleButton').addEventListener('click', function () {
+  document.querySelector('.table-of-summary').classList.toggle('show');
+});
+</script>
+```
+
+`r h4_header("Summary-for-Data1", "Summary for Dataset")`
+
+```{r}
+
+#To double confirm status of changes 
+data1 %>% skim() 
+
+```
+
+`r h4_header("survived", "Summary for survived")`
+
+```{r}
+
+survived_in_detail <- function(x){
+  death <- sum(x[,"survived"]=="D") %>% 
+            paste0(.," passengers died in the incident")
+  survive <- sum(x[,"survived"]=="S") %>% 
+            paste0(.," passengers survived the incident") 
+  results <- c(death, survive)
+  return(results)
+}
+survived_in_detail(data1) %>% result_display(.,"")
+
+
+```
+
+`r  h4_header("full-data-set","Full dataset")`
+
+```{r}
+data1 %>% kbl(caption="Full test.csv dataset") %>% kable_styling()
+```

@@ -114,7 +114,7 @@ dftest <- data.frame(
   link = c(
     'N/A',
     '<a href="" target="_blank">TBC</a>',
-    '<a href="public.tableau.com/profile/api/publish/Book1_17503194074060/Dashboard1" target="_blank">View</a>'),
+    '<a href="https://public.tableau.com/profile/api/publish/Book1_17503194074060/Dashboard1" target="_blank">View</a>'),
   stringsAsFactors = FALSE
 )
 

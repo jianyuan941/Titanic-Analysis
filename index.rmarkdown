@@ -125,7 +125,7 @@ kable(dftest,escape = FALSE)
 
 ### Dataset Overview
 
-8`{r} merged("mdf",data1,data2, "passenger_id") %>%    skim()`
+8`r .QuartoInlineRender(merged("mdf",data1,data2, "passenger_id") %>%    skim())`
 
 ### Gender Distribution Overview
 
@@ -470,3 +470,4 @@ Based on embarkation data, it appears that residents from Southampton were relat
 Additionally, the distribution of ticket classes reveals an interesting pattern: third-class tickets had the highest concentration, followed by first class, and then second class. This may suggest that the middle class was not a dominant segment in the society at the time.
 
 Lastly, the survivability rate presents a stark contrast between genders—100% of male passengers perished, while 100% of female passengers survived. This suggests that the survival pattern may have been influenced by deliberate planning, where men possibly sacrificed their lives to protect their family members.
+

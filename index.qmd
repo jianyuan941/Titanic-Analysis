@@ -114,7 +114,7 @@ dftest <- data.frame(
   link = c(
     'N/A',
     '<a href="" target="_blank">TBC</a>',
-    '<a href="" target="_blank">TBC</a>'),
+    '<a href="public.tableau.com/profile/api/publish/Book1_17503194074060/Dashboard1" target="_blank">View</a>'),
   stringsAsFactors = FALSE
 )
 
@@ -139,6 +139,19 @@ mdf %>%
 ```
 
 The pie chart above shows that the number of male passengers is approximately twice that of female passengers
+
+```{r}
+#| eval: false
+#| include: false
+output <- mdf %>% 
+        drop_na() %>% 
+        mutate(age_group = cut(age,
+                               breaks = c(0,10,20,30,40,50,60,82),
+                               labels = c(),
+                               right = FALSE,
+                               Ordered_result = TRUE))
+write.csv(output, "combined_set.csv", row.names = FALSE)
+```
 
 ### Gender Distribution to Each Age Group
 
